@@ -627,6 +627,9 @@ void PlaybackManager::DoPlayback(bool wasFramestepped)
 		if (m_pCurrentInput->IsRightPress())
 			PressKey('D', 0x01);
 
+		if (m_pCurrentInput->IsInteract())
+			PressKey('F', 0x01);
+
 		if (m_pCurrentInput->IsJournal())
 			PressKey(VK_TAB, 0x01);
 

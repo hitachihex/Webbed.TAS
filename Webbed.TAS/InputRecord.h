@@ -128,6 +128,9 @@ struct InputRecord
 		if (this->IsLaser())
 			result += ",Laser";
 
+		if (this->IsInteract())
+			result += ",Interact";
+
 		if (this->IsMouse())
 			result += ",Mouse : " + std::to_string(this->mouseX) + ", " + std::to_string(this->mouseY);
 
@@ -236,6 +239,9 @@ struct InputRecord
 		return this->restartRoom;
 	}
 
+	bool IsInteract() {
+		return this->HasFlag(this->m_InputState, EInputState::INTERACT);
+	}
 
 	InputRecord(unsigned long frames, EInputState state)
 	{
@@ -391,6 +397,10 @@ struct InputRecord
 					this->hasAngle = true;
 					continue;
 				}*/
+				else if (token == "INTERACT") {
+					TempState |= EInputState::INTERACT;
+					continue;
+				}
 				else if (token == "DANCE") {
 					TempState |= EInputState::DANCE;
 					continue;
