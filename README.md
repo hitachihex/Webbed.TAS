@@ -12,7 +12,9 @@ If the game is ran as administrator, you will need to run the injector as admini
 
 Default hotkeys are:
 
-F1 - To toggle pause\unpause
+F1 - To pause
+
+\ - To unpause
 
 F2 - Lock cursor ingame so you can't interfere with playback on accident, toggle this before doing playback.
 
