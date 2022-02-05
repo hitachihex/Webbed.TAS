@@ -31,7 +31,7 @@ Note: It won't understep (e.g go backwards and redo) you can only edit a current
       played back.
 
 
-# Note: You may use multiple input files. Create a folder called Includes in the directory where webbed.exe is. Name them anything with an extension of .rec
+# Note: You may use multiple input files. Create a folder called Includes in the directory where webbed.exe is. Create files in here and name them anything with an extension of .rec
 # But note that multi-level applies from the main input file only, so included input files may not read from another file.
 
 --------------------------------------------------------
