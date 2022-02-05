@@ -35,13 +35,14 @@ Note: It won't understep (e.g go backwards and redo) you can only edit a current
 # But note that multi-level applies from the main input file only, so included input files may not read from another file.
 
 --------------------------------------------------------
-For playback, Left,Right,Up,Down must be bound to at least WASD.
-Grapple must be at least bound to G.
-Weave must be at least bound to B.
-Journal must be at least bound to Tab.
-Jump must be at least bound to Spacebar.
-Dance must be at least bound to Q.
-Laser must be at least bound to E.
+For playback, Left,Right,Up,Down must be bound to at least WASD. <br />
+Grapple must be at least bound to G. <br />
+Weave must be at least bound to B. <br />
+Journal must be at least bound to Tab. <br />
+Jump must be at least bound to Spacebar. <br />
+Dance must be at least bound to Q. <br />
+Laser must be at least bound to E. <br />
+Interact must be at least bound to F. <br />
 
 #NOTE: 
 Commands read from input file are in the format of:
@@ -56,6 +57,7 @@ Accepted commands are: <br />
     RightP - single frame press right <br />
     UpP - single frame press up <br />
     DownP - single frame press down <br />
+    Interact <br />
     Dance <br />
     Left <br />
     Right <br />
