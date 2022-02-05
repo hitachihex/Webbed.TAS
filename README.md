@@ -7,6 +7,9 @@ TAS tools for the game Webbed
 # YOU CAN CHANGE IT IF YOU WISH. LINE 332 AND LINE 360. VALUES 540 AND 960. FOR LINE 332 IT IS Y RESOLUTION / 2 , AND FOR LINE 360 IT IS X RESOLUTION / 2
 
 # Note: place Webbed.PEPatch.exe in same directory as game executable (webbed.exe)
+
+Create a file called Webbed.rec where the game executable is for putting inputs into (it does not create it for you)
+
 To use the tool, run Webbed.PEPatch.exe (before running the game, make a backup of the webbed.exe file, you only need to run Webbed.PEPatch once) then run Webbed.Injector after running the game executable, make sure Webbed.TAS.dll and EasyHook32.dll are in the same directory as the injector executable.
 If the game is ran as administrator, you will need to run the injector as administrator, otherwise it doesn't matter what privilege it is ran as.
 
@@ -72,4 +75,4 @@ Accepted commands are: <br />
     Laser <br />
     Pew (alias for laser) <br />
     Slow  - set this on inputs you don't want runto to fast forward during. Can be useful to combat desynchs via finding offending frames that work poorly in runto. <br />
-    Read - accepts a sub command for the input file to read from. e.g Read, File.rec. It assumes they are in the Includes folder. <br />
+    Read - accepts a sub command for the input file to read from. e.g Read, File.rec. It assumes they are in the Includes folder. This command can only be used in the main Webbed.rec file<br />
