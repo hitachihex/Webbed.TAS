@@ -7,7 +7,7 @@ TAS tools for the game Webbed
 # YOU CAN CHANGE IT IF YOU WISH. LINE 332 AND LINE 360. VALUES 540 AND 960. FOR LINE 332 IT IS Y RESOLUTION / 2 , AND FOR LINE 360 IT IS X RESOLUTION / 2
 
 # Note: place Webbed.PEPatch.exe in same directory as game executable (webbed.exe)
-To use the tool, run Webbed.PEPatch.exe (before running the game, make a backup of the webbed.exe file) then run Webbed.Injector after running the game executable, make sure Webbed.TAS.dll is in the same directory as the injector executable.
+To use the tool, run Webbed.PEPatch.exe (before running the game, make a backup of the webbed.exe file) then run Webbed.Injector after running the game executable, make sure Webbed.TAS.dll and EasyHook32.dll are in the same directory as the injector executable.
 If the game is ran as administrator, you will need to run the injector as administrator, otherwise it doesn't matter what privilege it is ran as.
 
 Default hotkeys are:
