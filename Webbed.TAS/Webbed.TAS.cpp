@@ -161,7 +161,7 @@ void PatchDeltaTime() {
 	*(unsigned char*)(patch_addr + 4) = 0x90;
 	*(unsigned char*)(patch_addr + 5) = 0x90;
 
-	*(unsigned long*)(0x1669908) = 02;
+	*(unsigned long*)(0x1669908) = 16667;
 
 
 }
