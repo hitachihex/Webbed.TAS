@@ -49,7 +49,7 @@ Interact must be at least bound to F. <br />
 
 #NOTE: 
 Commands read from input file are in the format of:
-   frames, Action
+   frames, Actions
    
 Commnds are case-insensitive.
    
