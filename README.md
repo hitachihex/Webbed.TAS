@@ -60,6 +60,7 @@ Accepted commands are: <br />
     RightP - single frame press right <br />
     UpP - single frame press up <br />
     DownP - single frame press down <br />
+    JumpP - single frame jump press <br />
     Interact <br />
     Dance <br />
     Left <br />
