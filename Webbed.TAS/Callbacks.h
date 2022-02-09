@@ -26,4 +26,10 @@ extern void __cdecl GMLObject_oRoomTransition_Create0_Callback(GMLObject*, void*
 
 //00B0AE33         | C746 30 97FA4301                   | mov dword ptr ds:[esi+0x30],webbed.143FA97                              | 143FA97:"gml_Object_oPlayer_CleanUp_0"
 extern void __cdecl GMLObject_oPlayer_Cleanup0_Callback(GMLObject*, void*);
+
+//00A57613         | C746 1C A4F54301                   | mov dword ptr ds:[esi+0x1C],webbed.143F5A4                              | 143F5A4:"gml_Object_oPlayer_Create_0"
+extern void __cdecl GMLObject_oPlayer_Create0_Callback(GMLObject*, void*);
+
+//00E78313         | C746 40 D0714401                   | mov dword ptr ds:[esi+0x40],webbed.14471D0                              | 14471D0:"gml_Object_oDebugSpawner_Step_0"
+extern void __cdecl GMLObject_oDebugSpawnwer_Step0_Callback(GMLObject*, void*);
 extern void SetupEventCallbacks();

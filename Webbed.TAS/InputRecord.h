@@ -28,7 +28,8 @@ enum EInputState {
 	INTERACT = 1 << 15,
 	ANGLE = 1 << 16,
 	MOUSE = 1 << 17,
-	SLOWDOWN = 1 << 18
+	SLOWDOWN = 1 << 18,
+	JUMPP = 1 << 19
 };
 
 struct InputRecord
@@ -56,6 +57,12 @@ struct InputRecord
 	bool hasAngle;
 
 	double angle;
+
+	double maxWalkSpeed;
+	bool hasMaxWalkSpeed;
+
+	double pullPower;
+	bool hasPullPower;
 
 	bool restartRoom;
 
@@ -194,6 +201,10 @@ struct InputRecord
 		return this->HasFlag(this->m_InputState, EInputState::JUMP);
 	}
 
+	bool IsJumpPress() {
+		return this->HasFlag(this->m_InputState, EInputState::JUMPP);
+	}
+
 	bool IsGrapple() {
 		return this->HasFlag(this->m_InputState, EInputState::GRAPPLE);
 	}
@@ -245,6 +256,10 @@ struct InputRecord
 
 	InputRecord(unsigned long frames, EInputState state)
 	{
+		this->pullPower = 0.0;
+		this->hasPullPower = false;
+		this->maxWalkSpeed = 0.0;;
+		this->hasMaxWalkSpeed = false;
 		this->hasPlugJournal = false;
 		this->hasUnplugJournal = false;
 		this->handledByCreate = false;
@@ -272,6 +287,10 @@ struct InputRecord
 #pragma warning(disable : 4996)
 	InputRecord(std::string line, unsigned int ln, const char* filename, unsigned int otherln)
 	{
+		this->pullPower = 0.0;
+		this->hasPullPower = false;
+		this->maxWalkSpeed = 0.0;;
+		this->hasMaxWalkSpeed = false;
 		this->hasPlugJournal = false;
 		this->hasUnplugJournal = false;
 		this->handledByCreate = false;
@@ -380,6 +399,10 @@ struct InputRecord
 					TempState |= EInputState::JUMP;
 					continue;
 				}
+				else if (token == "JUMPP") {
+					TempState |= EInputState::JUMPP;
+					continue;
+				}
 				else if (token == "SLOW")
 				{
 					TempState |= EInputState::SLOWDOWN;
@@ -390,15 +413,24 @@ struct InputRecord
 					TempState |= EInputState::ESCAPE;
 					continue;
 				}
-				/*
 				else if (token == "ANGLE")
 				{
 					this->angle = std::strtod(tokens[i + 1].c_str(), nullptr);
 					this->hasAngle = true;
 					continue;
-				}*/
+				}
 				else if (token == "INTERACT") {
 					TempState |= EInputState::INTERACT;
+					continue;
+				}
+				else if (token == "MAXWALK") {
+					this->hasMaxWalkSpeed = true;
+					this->maxWalkSpeed = std::strtod(tokens[i + 1].c_str(), nullptr);
+					continue;
+				}
+				else if (token == "PULLPOWER") {
+					this->hasPullPower = true;
+					this->pullPower = std::strtod(tokens[i + 1].c_str(), nullptr);
 					continue;
 				}
 				else if (token == "DANCE") {

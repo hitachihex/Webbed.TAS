@@ -9,15 +9,22 @@ bool g_bCursorLocked = false;
 unsigned int g_GameSpeedPlayerStep = 1;
 bool g_bPressedFrameStepThisFrame = false;
 GMLObject* g_pPlayerObject = nullptr;
+GMLObject* g_pGameManager = nullptr;
 GMLObject* g_pCameraObject = nullptr;
 PlaybackManager* g_pPlaybackMgr = nullptr;
 GMLObject* g_pTopBranch = nullptr;
 GMLObject* g_pBottomBranch = nullptr;
-
+GMLObject* g_pIOObject = nullptr;
+GMLObject* g_pDebugSpawner = nullptr;
+double g_mouse_x = 0.0;
+double g_mouse_y = 0.0;
 
 YYGDrawTextArgumentsPacked* g_pDrawTextArgs = new YYGDrawTextArgumentsPacked();
 YYGStringObject* g_pStringObject = new YYGStringObject();
 YYGDrawTextUnkArgument* g_pDrawTextUnk = new YYGDrawTextUnkArgument();
+YYGS_RetValDouble* g_pOutDbl = new YYGS_RetValDouble();
+
+fn_varinst_get_names varinst_get_names = (fn_varinst_get_names)(WEBBED_VARINST_GETNAMES_ADDRESS);
 
 
 __declspec(noinline) void PressKey(unsigned int k, unsigned char v)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include "DebugTools.h"
 
 #define FLG_BBOX_SOMETHING 1 << 3
 #define FLG_VISIBLE        1 << 4
@@ -88,6 +89,19 @@ private:
 struct PhysicsPropertiesInstance {
 
 public:
+
+	float* getPhysicsSpeedPtr() {
+		return &this->m_fSpeedX;
+	}
+
+	float getPhysicsStepSpeedX(float step) {
+		return (this->m_fSpeedX);
+	}
+
+	float getPhysicsStepSpeedY(float step) {
+		return (this->m_fSpeedY);
+	}
+
 	// 0x0000 - 0x0003
 	unsigned long m_dwUnk0000_0003;
 
@@ -111,6 +125,15 @@ public:
 
 	// 0x0010 - 0x0013
 	float m_fPhysY;
+
+	// 0x0014 - 0x004F
+	unsigned char m_ucUnknown0014_004F[0x50 - 0x14];
+
+	// 0x0050 - 0x0053
+	float m_fSpeedX;
+
+	// 0x0054 - 0x0057
+	float m_fSpeedY;
 protected:
 private:
 
@@ -134,7 +157,52 @@ private:
 };
 
 
+
+// it should be 3 bytes
+class VariablePointer {
+public:
+
+	// 0x0000 - 0x0003
+	double* m_Value;
+
+	// 0x0004 - 0x0007
+	unsigned long m_Id;
+
+	// 0x0008 - 0x000B
+	unsigned long m_NameHash;
+protected:
+private:
+};
+class InstanceVariableInternal {
+public:
+	// 0x0000 - 0x0003
+	VariablePointer variables[0x500];
+protected:
+private:
+
+};
+class InstanceVariableProperties {
+public:
+	// 0x0000 - 0x0003
+	unsigned long m_dwUnk0000_0003;
+
+	// 0x0004 - 0x0007
+	unsigned long m_nVariableCount;
+
+	// 0x0008 - 0x000B
+	unsigned long m_dwUnk0008_000B;
+
+	// 0x000C - 0x000F
+	unsigned long m_dwUnk000C_000F;
+
+	// 0x0010 - 0x0013
+	InstanceVariableInternal* m_pInternal;
+protected:
+private:
+};
+
 // just make GMLObject inherit from this, but add the vtable.
+// 2c, 10, 0
 typedef struct t_GMLRoomObjectInstance
 {
 
@@ -148,11 +216,30 @@ typedef struct t_GMLRoomObjectInstance
 	virtual void* get_variable_ptr(unsigned int index) = 0;
 
 
+	/*
+	void dump_variable_names() {
+		unsigned long var_count = this->m_pInstProps->m_nVariableCount;
+
+		for (unsigned long i = 0; i < var_count; i++) {
+			unsigned long var_id = this->m_pInstProps->m_pInternal->variables[i].m_Id;
+			unsigned long index_as_instance_id = (var_id - 0x186A0);
+			//011D991A         | A1 C8D75C01                        | mov eax,dword ptr ds:[0x15CD7C8]                                        |
+			unsigned long dwEax = *(unsigned long*)(0x15CD7C8);
+			const char* varName = (const char*)(*(unsigned long*)dwEax + index_as_instance_id * 4);
+
+			DebugOutput("VarName with id %08X and index %d is %s", var_id, i, varName);
+		}
+	}*/
+
 	// useful methods
 	double* get_dbl_ptr(unsigned int index) {
 		return (double*)this->get_variable_ptr(index);
 	}
 
+
+	unsigned long getInstanceID() {
+		return this->id_1;
+	}
 
 	double* getXSpeedPtr() {
 		return get_dbl_ptr(0x1898E);
@@ -181,26 +268,17 @@ typedef struct t_GMLRoomObjectInstance
 	// 0x04 - 0x2B
 	unsigned char m_ucUnknown04_2B[0x2C - 0x04];
 
-	// 0x2C 
-	bool m_bDoesDraw;
-
-	// 0x2D
-	bool m_bDeactivated;
-
-	// 0x2E
-	bool m_bUnk002E;
-
-	// 0x2F
-	bool m_bUnk002F;
+	// 0x2C - 0x2F
+	InstanceVariableProperties* m_pInstProps;
 
 	// 0x0030 - 0x004F
 	unsigned char m_ucUnk0030_0077[0x50 - 0x30];
 
 	// 0x0050 - 0x0053
-	float m_phys_speed_x;
+	unsigned long m_dwUnk0050_0053;
 
 	// 0x0054 - 0x0057
-	float m_phys_speed_y;
+	unsigned long m_dwUnk0054_0057;
 
 	// 0x0058 - 0x0067
 	unsigned char m_ucUnk0058_0067[0x68 - 0x58];
@@ -229,8 +307,11 @@ typedef struct t_GMLRoomObjectInstance
 	// 0x0084 - 0x0087
 	unsigned long id_1;
 
-	// 0x0088 - 0x00AF
-	unsigned char m_ucUnk0080_009F[0xB0 - 0x88];
+	// 0x0088 - 0x008B
+	unsigned long object_index;
+
+	// 0x008C - 0x00AF
+	unsigned char m_ucUnk0080_009F[0xB0 - 0x8C];
 
 	// 0x00B0 - 0x00B3
 	unsigned long m_dwUnk00B0_00B3;

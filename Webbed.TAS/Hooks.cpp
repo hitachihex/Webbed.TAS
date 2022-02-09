@@ -10,7 +10,6 @@
 #include "PlaybackManager.h"
 #include <cmath>
 
-#define MPI 3.14159265358979323846
 
 #pragma warning(disable : 4996)
 oEventLoop original_EventLoop = (oEventLoop)(WEBBED_EVENTLOOP_ADDR);
@@ -19,7 +18,7 @@ odraw_text original_draw_text = (odraw_text)(WEBBED_DRAWTEXT_ADDR);
 oWindowMouseGetX original_window_mouse_get_x = (oWindowMouseGetX)(WEBBED_WINDOWMOUSEGETX_ADDR);
 oWindowMouseGetY original_window_mouse_get_y = (oWindowMouseGetY)(WEBBED_WINDOWMOUSEGETY_ADDR);
 oGMLCallFunction original_GMLCallFunction = (oGMLCallFunction)(WEBBED_GMLCALLFUNCTION_ADDR);	
-
+ocheck_key_held original_check_key_held = (ocheck_key_held)(WEBBED_CHECK_KEY_HELD_ADDR);
 
 void __cdecl YoYoUpdate_Hook()
 {
@@ -102,8 +101,30 @@ void __cdecl YoYoUpdate_Hook()
 
 	if (GetAsyncKeyState(0x68) & 1)
 	{
-		//g_pStringObject->Set((char*)"Save.dat");
-		//game_save(g_pStringObject);
+		
+		
+		ugly_hack = true;
+
+	
+		/*
+		if (g_pPlayerObject) {
+			dump_variable_names(g_pPlayerObject, "player_var_names.txt");
+		}
+
+		if (g_pGameManager) {
+			dump_variable_names(g_pGameManager, "game_manager_var_names.txt");
+		}
+
+		if (g_pCameraObject) {
+			dump_variable_names(g_pCameraObject, "camera_var_names.txt");
+		}
+
+		if (g_pIOObject) {
+			dump_variable_names(g_pIOObject, "io_var_names.txt");
+		}*/
+
+
+
 	}
 
 	if (GetAsyncKeyState(0x69) & 1) {
@@ -139,7 +160,6 @@ void __cdecl YoYoUpdate_Hook()
 		{
 			g_bPressedFrameStepThisFrame = true;
 			original_YoyoUpdate();
-
 			
 			if (g_pPlaybackMgr)
 			{
@@ -214,7 +234,7 @@ bool __cdecl EventLoop_Hook(void* arg1, void* arg2, void* arg3, void* arg4, void
 		else
 		{
 
-			/* Generics are broken, figure out why
+			//Generics are broken, figure out why
 			bool hookedGeneric = false;
 			for (size_t i = 0; i < g_GenericObjectEventNames.size(); i++)
 			{
@@ -239,7 +259,7 @@ bool __cdecl EventLoop_Hook(void* arg1, void* arg2, void* arg3, void* arg4, void
 				VirtualProtect(&pEvent->m_pSubData->m_dwAddressToCall, 0x04, PAGE_EXECUTE_READWRITE, &dwOldProt);
 				pEvent->m_pSubData->m_dwAddressToCall = pEventCallbackHook->m_dwCallback;
 
-			}*/
+			}
 		}
 	}
 	else if (pEvent->m_ObjectEventType == EObjectEventType::OET_UNKNOWN_03)
@@ -304,7 +324,10 @@ float __stdcall gamepad_get_axis_value_hook(unsigned int axisIndex)
 constexpr double center_x = WINDOW_WIDTH / 2;
 constexpr double center_y = WINDOW_HEIGHT / 2;
 void __cdecl window_mouse_get_y_Hook(YYRealAgument* arg) {
+
 	original_window_mouse_get_y(arg);
+	g_mouse_y = arg->value;
+
 	if (g_pPlaybackMgr) {
 		if (g_pPlaybackMgr->IsPlayingBack()) {
 			auto curInput = g_pPlaybackMgr->GetCurrentInput();
@@ -342,6 +365,8 @@ void __cdecl window_mouse_get_y_Hook(YYRealAgument* arg) {
 void __cdecl window_mouse_get_x_Hook(YYRealAgument* arg) {
 
 	original_window_mouse_get_x(arg);
+	g_mouse_x = arg->value;
+
 	if (g_pPlaybackMgr) {
 		if (g_pPlaybackMgr->IsPlayingBack()) {
 			auto curInput = g_pPlaybackMgr->GetCurrentInput();
@@ -397,4 +422,26 @@ void __cdecl GMLCallFunction_Hook(void* arg1, void* arg2, void* arg3, void* arg4
 	}
 
 	original_GMLCallFunction(arg1, arg2, arg3, arg4, index, arg6);
+}
+
+bool __cdecl check_key_held_Hook(unsigned char kc) {
+
+	static bool bOnce = false;
+
+	if (!bOnce) {
+		bOnce = true;
+		DebugOutput("check_key_held hook, !bOnce");
+	}
+
+	if (g_pPlaybackMgr) {
+		if (g_pPlaybackMgr->IsPlayingBack()) {
+			auto cur_input = g_pPlaybackMgr->GetCurrentInput();
+			if (cur_input->HasFlag(cur_input->m_InputState, EInputState::RIGHT) && kc == 'D') {
+				//DebugOutput("holding right..");
+				return true;
+			}
+		}
+	}
+
+	return original_check_key_held(kc);
 }

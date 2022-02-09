@@ -10,6 +10,7 @@
 void __cdecl GMLObject_Generic_Callback(GMLObject* pGMLObject, void* arg2)
 {
 
+	bool bOnce = false;
 	GameMaker_Event* pGMLObjectEvent = nullptr;
 	__asm
 	{
@@ -23,6 +24,15 @@ void __cdecl GMLObject_Generic_Callback(GMLObject* pGMLObject, void* arg2)
 	if (cbEvent == nullptr)
 		DebugOutput("we're going to crash!");
 
+	/*
+	//00B71F76         | C745 D0 96034401                   | mov dword ptr ss:[ebp-0x30],webbed.1440396                              | 1440396:"gml_Object_oSlipperyWall_Create_0"
+	if (objEventName.find("oSlipperyWall_Step") != std::string::npos) {
+		double* grabbable = pGMLObject->get_dbl_ptr(0x188F2);
+		double* breakable = pGMLObject->get_dbl_ptr(0x18743);
+
+		*grabbable = 1.0f;
+		*breakable = 1.0f;
+	}*/
 	((void(__cdecl*)(void*, void*))cbEvent->m_dwOriginal)(pGMLObject, arg2);
 
 }
@@ -40,6 +50,13 @@ void __cdecl GMLObject_oPlayer_Step0_Callback(GMLObject* pObject, void* arg2)
 
 	g_pPlayerObject = pObject;
 	//pObject->set_visible(false);
+
+	/*
+	double* webshot_delay = pObject->get_dbl_ptr(0x18D23);
+	double* webshot_timer = pObject->get_dbl_ptr(0x18D25);
+	*webshot_delay = 0.0f;
+	*webshot_timer = 0.0f;*/
+
 
 	gmobj_call_orig(pObject, arg2, g_pEventCallback_PlayerStep0);
 
@@ -66,6 +83,20 @@ void __cdecl GMLObject_oIO_Step1_Callback(GMLObject* pObject, void* arg2) {
 		DebugOutput("oIO_Step1_Callback: pObject = %p", pObject);
 	}
 
+	g_pIOObject = pObject;
+
+	/*
+	if (ugly_hack)
+	{
+		auto boyfriend = instance_create_depth(*(unsigned long*)(WEBBED_PHYSICS_SYSTEM_PTR_ADDR), 0x0, g_pPlayerObject->m_fX, g_pPlayerObject->m_fY, 0x3DE, 0x155);
+		//012922D0
+		((void(__cdecl*)(GMLObject*, GMLObject*, unsigned int, unsigned int))0x012922D0)(boyfriend, boyfriend, 0x0E, 0x00);
+		((void(__cdecl*)(GMLObject*, GMLObject*, unsigned int, unsigned int))0x012922D0)(boyfriend, boyfriend, 0x00, 0x00);
+		boyfriend->set_visible(true);
+		DebugOutput("Tried to create debugspawner");
+		ugly_hack = false;
+
+	}*/
 
 	if (g_pPlaybackMgr)
 	{
@@ -74,8 +105,9 @@ void __cdecl GMLObject_oIO_Step1_Callback(GMLObject* pObject, void* arg2) {
 			g_pPlaybackMgr->DoPlayback(g_bPressedFrameStepThisFrame);
 		}
 	}
-
 	gmobj_call_orig(pObject, arg2, g_pEventCallback_oIOStep1);
+
+
 }
 
 void __cdecl GMLObject_oCamera_Step1_Callback(GMLObject* pObject, void* arg2) {
@@ -101,7 +133,6 @@ void __cdecl GMLObject_oGameManager_Draw0_Callback(GMLObject* pObject, void* arg
 		DebugOutput("oGameManager_Draw0_Callback: pObject = %p", pObject);
 	}
 
-
 	if (g_pCameraObject) {
 		//DebugOutput("Trying to draw SPOODER at %f, %f, white, and font 1", g_pCameraObject->m_fX - 900.0, g_pCameraObject->m_fY - 500.0);
 	}
@@ -117,6 +148,8 @@ void __cdecl GMLObject_oGameManager_Draw75_Callback(GMLObject* pObject, void* ar
 		DebugOutput("oGameManager_Draw75_Callback: pObject = %p", pObject);
 	}
 
+
+	g_pGameManager = pObject;
 		/*
 		std::string fmt = "\nPos: ";
 		fmt += std::to_string(g_pPlayerObject->m_fX) + ", " + std::to_string(g_pPlayerObject->m_fY);
@@ -220,6 +253,25 @@ void __cdecl GMLObject_oPlayer_Cleanup0_Callback(GMLObject* pObject, void* arg2)
 	return gmobj_call_orig(pObject, arg2, g_pEventCallback_oPlayerCleanup0);
 }
 
+void __cdecl GMLObject_oPlayer_Create0_Callback(GMLObject* pObject, void* arg2) {
+	// invalidate player object when cleanup happens. it will be set in step0 again.
+	g_pPlayerObject = pObject;
+	return gmobj_call_orig(pObject, arg2, g_pEventCallback_oPlayerCreate0);
+}
+
+void __cdecl GMLObject_oDebugSpawnwer_Step0_Callback(GMLObject* pObject, void* arg2) {
+
+	static bool bOnce = false;
+	if (!bOnce)
+	{
+		bOnce = true;
+		DebugOutput("oDebugSpawner_Step0_Callback: pObject = %p", pObject);
+	}
+
+	g_pDebugSpawner = pObject;
+	return gmobj_call_orig(pObject, arg2, g_pEventCallback_oDebugSpawnerStep0);
+}
+
 // 0x19612 bottom branch
 // 0x19613 top branch
 //0062E7C3         | C746 40 B5AD4201                   | mov dword ptr ds:[esi+0x40],webbed.142ADB5                              | [esi+40]:"gml_Object_oInstructionPrompt_Draw_75", 142ADB5:"gml_Script_draw_button_prompt"
@@ -254,6 +306,10 @@ void SetupEventCallbacks() {
 
 	t_EventCallbackHook::Init(g_pEventCallback_oPlayerCleanup0, "gml_Object_oPlayer_CleanUp_0", (unsigned long)(&GMLObject_oPlayer_Cleanup0_Callback), 0xDEADBEEF);
 
+	t_EventCallbackHook::Init(g_pEventCallback_oPlayerCreate0, "gml_Object_oPlayer_Create_0", (unsigned long)(&GMLObject_oPlayer_Create0_Callback), 0xDEADBEEF);
+
+	t_EventCallbackHook::Init(g_pEventCallback_oDebugSpawnerStep0, "gml_Object_oDebugSpawner_Step_0", (unsigned long)(&GMLObject_oDebugSpawnwer_Step0_Callback), 0xDEADBEEF);
+
 	g_CallbackMap[g_pEventCallback_PlayerStep0->m_ObjectEventName] = g_pEventCallback_PlayerStep0;
 
 	g_CallbackMap[g_pEventCallback_oCameraStep1->m_ObjectEventName] = g_pEventCallback_oCameraStep1;
@@ -275,4 +331,8 @@ void SetupEventCallbacks() {
 	g_CallbackMap[g_pEventCallback_oRoomTransitionCreate0->m_ObjectEventName] = g_pEventCallback_oRoomTransitionCreate0;
 
 	g_CallbackMap[g_pEventCallback_oPlayerCleanup0->m_ObjectEventName] = g_pEventCallback_oPlayerCleanup0;
+
+	g_CallbackMap[g_pEventCallback_oPlayerCreate0->m_ObjectEventName] = g_pEventCallback_oPlayerCreate0;
+
+	g_CallbackMap[g_pEventCallback_oDebugSpawnerStep0->m_ObjectEventName] = g_pEventCallback_oDebugSpawnerStep0;
 }

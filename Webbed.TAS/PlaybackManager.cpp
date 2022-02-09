@@ -572,11 +572,38 @@ void PlaybackManager::DoPlayback(bool wasFramestepped)
 			}
 		}
 
-		if (m_pCurrentInput->hasMouse) {
+		if (m_pCurrentInput->hasAngle) {
 			//this->lastMouseXInput = m_pCurrentInput->mouseX;
 			//this->lastMouseYInput = m_pCurrentInput->mouseY;
+			/*
+			if (g_pIOObject) {
+				double* mode = g_pIOObject->get_dbl_ptr(0x18A10);
+				*mode = 1.0;
+				double * rs_h = g_pIOObject->get_dbl_ptr(RSTICK_HORIZONTAL_INDEX);
+				double * rs_v = g_pIOObject->get_dbl_ptr(RSTICK_VERTICAL_INDEX);
+
+				
+				double rads = (m_pCurrentInput->angle * (MPI / 180.0));
+					*rs_h = sin(rads);
+					*rs_v = -cos(rads);
+			}*/
 		}
 
+		if (m_pCurrentInput->hasMaxWalkSpeed) {
+			if (g_pPlayerObject) {
+				//18A00
+				auto max_walk = g_pPlayerObject->get_dbl_ptr(0x18A00);
+				*max_walk = m_pCurrentInput->maxWalkSpeed;
+			}
+		}
+
+		if (m_pCurrentInput->hasPullPower) {
+			if (g_pPlayerObject) {
+				//VarName with id 00018AFC and index 61 is pull_power
+				auto pull_power = g_pPlayerObject->get_dbl_ptr(0x18AFC);
+				*pull_power = m_pCurrentInput->pullPower;
+			}
+		}
 		if (m_pCurrentInput->IsRoomGoto())
 		{
 			// reset wave counter.
@@ -598,9 +625,13 @@ void PlaybackManager::DoPlayback(bool wasFramestepped)
 			HoldKey('A', 0x01);
 		}
 
+		
 		if (m_pCurrentInput->IsRight())
 		{
+			PressKey('D', 0x01);
+			ReleaseKey('D', 0x00);
 			HoldKey('D', 0x01);
+			HoldKey(VK_RIGHT, 0x01);
 		}
 
 		if (m_pCurrentInput->IsUp())
@@ -633,6 +664,9 @@ void PlaybackManager::DoPlayback(bool wasFramestepped)
 		if (m_pCurrentInput->IsJournal())
 			PressKey(VK_TAB, 0x01);
 
+		if (m_pCurrentInput->IsJumpPress())
+			PressKey(0x20, 0x01);
+
 		if (m_pCurrentInput->hasPlugJournal) {
 			this->plugForJournal = true;
 		}
@@ -647,6 +681,16 @@ void PlaybackManager::DoPlayback(bool wasFramestepped)
 			//HoldKey(0x20, 0x00);
 			ReleaseKey(0x20, 0x01);
 		}*/
+
+		// ---------------------------------------------------
+
+
+
+
+
+
+
+
 
 		// Handle holding \ pressing of dance
 		if (m_pCurrentInput->IsDance())
@@ -878,18 +922,37 @@ void PlaybackManager::FormatManagerString()
 	if (g_bCursorLocked) playerInfo += "true";
 	else playerInfo += "false";
 
+	//VarName with id 000189C0 and index 65 is lock_to_room
+	//VarName with id 000189C1 and index 115 is locked
+	if (g_pCameraObject) {
+		//playerInfo += "\nCamLocked: " + std::to_string(*g_pCameraObject->get_dbl_ptr(0x189C1));
+		//playerInfo += "\nCamLockToRoom: " + std::to_string(*g_pCameraObject->get_dbl_ptr(0x189C0));
+	}
 
 	// make sure we're not in main menu
 	if (g_pPlayerObject && GetCurrentRoomID() != 13)
 	{
-		if (this->IsPlayingBack() && !this->plugForJournal) {
+		if (!this->plugForJournal) {
 			playerInfo += "\nPos: " + std::to_string(g_pPlayerObject->m_fX) + ", " + std::to_string(g_pPlayerObject->m_fY);
 
-			//double* vspeed = g_pPlayerObject->getSpeedYPtr();
-			double* hspeed = g_pPlayerObject->getXSpeedPtr();
-			double* vspeed = g_pPlayerObject->getYSpeedPtr();
+			//double* hspeed = g_pPlayerObject->getXSpeedPtr();
+			//double* vspeed = g_pPlayerObject->getYSpeedPtr();
 
-			playerInfo += "\nSpeed: " + std::to_string(*hspeed) + ", " + std::to_string(*vspeed);
+			//VarName with id 00018AA7 and index 121 is phy_buffer_speed_x
+			//VarName with id 00018AA8 and index 121 is phy_buffer_speed_y
+
+			//double* phy_buffer_speed_x = g_pPlayerObject->get_dbl_ptr(0x18AA7);
+			//double* phy_buffer_speed_y = g_pPlayerObject->get_dbl_ptr(0x18AA8);
+
+
+			float* speeds = g_pPlayerObject->m_pPhysProp->physInst->getPhysicsSpeedPtr();
+			float speed_x = g_pPlayerObject->m_pPhysProp->physInst->getPhysicsStepSpeedX(GetPhysicsSystem()->m_pPhysRoom->m_fStepRate);
+			float speed_y = g_pPlayerObject->m_pPhysProp->physInst->getPhysicsStepSpeedY(GetPhysicsSystem()->m_pPhysRoom->m_fStepRate);
+
+			//	playerInfo += "\nSpeed: " + std::to_string(speeds[0]) + ", " + std::to_string(speeds[1]);
+			playerInfo += "\nSpeed: " + std::to_string(speed_x) + ", " + std::to_string(speed_y);
+			//playerInfo += "\nSpeed: " + std::to_string(*hspeed) + ", " + std::to_string(*vspeed);
+
 
 			PhysicsSystem* pPhys = GetPhysicsSystem();
 			if (pPhys) {
@@ -927,7 +990,7 @@ void PlaybackManager::FormatManagerString()
 	}
 	else
 	{
-		sprintf(this->m_szCurrentManagerState, playerInfo.c_str());
+		sprintf(this->m_szCurrentManagerState, "%s", playerInfo.c_str());
 	}
 
 

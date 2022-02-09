@@ -15,8 +15,12 @@
 //012B7E7B         | 8A80 68598801                      | mov al,byte ptr ds:[eax+0x1885968] 
 #define WEBBED_KEYHELD_PTR_ADDR 0x1885968
 
-//012B7EEB         | 8A80 685A8801                      | mov al,byte ptr ds:[eax+0x1885A68]      
+//012B7EEB         | 8A80 685A8801                      | mov al,byte ptr ds:[eax+0x1885A68]   
+   
 #define WEBBED_KEYRELEASE_PTR_ADDR 0x01885A68
+
+//012B7E40 | A1 60598801 | mov eax, dword ptr ds : [0x1885960] |
+#define WEBBED_KEYBOARD_KEY_ADDR 0x1885960
 
 //011D4694         | 890D 34D65C01                      | mov dword ptr ds:[0x15CD634],ecx                                        |
 #define WEBBED_FONTCOLOR_PTR_ADDR  0x015CD634
@@ -29,6 +33,8 @@
 #define WEBBED_WINDOWMOUSEGETX_ADDR 0x011CB750
 
 #define WEBBED_WINDOWMOUSEGETY_ADDR 0x011CB770
+
+#define WEBBED_CHECK_KEY_HELD_ADDR 0x011D6360
 
 //0121958B | 66:0F6E05 A8996601 | movd xmm0, dword ptr ds : [0x16699A8] |
 #define WEBBED_CURRENTROOMID_ADDR 0x16699A8
@@ -50,3 +56,15 @@
 #define WEBBED_GAMESPEED_ADDR 0x1669A28
 
 #define WEBBED_GAMESAVE_ADDR 0x0119D500
+
+#define WEBBED_INTERNAL_GET_INSTANCE_VARIABLE_ADDR 0x011D9160
+#define WEBBED_VARINST_GETNAMES_ADDRESS 0x011BCA20
+
+#define WEBBED_VARIABLE_NAMES_LIST_ADDR 0x15CD7C8
+
+#define WEBBED_ROOM_RESTART_ADDR 0x011A0560
+
+//012D5D1B         | 81C1 C8A68801                      | add ecx,webbed.188A6C8                                                  |
+#define WEBBED_MATRIX_PTR_ADDR 0x188A6C8  
+
+#define WEBBED_CREATE_INSTANCE_ADDR 0x011DA330
