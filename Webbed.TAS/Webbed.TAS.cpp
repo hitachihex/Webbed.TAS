@@ -26,6 +26,7 @@ HOOK_TRACE_INFO WindowMouseGetXHookHandle = { NULL };
 HOOK_TRACE_INFO WindowMouseGetYHookHandle = { NULL };
 HOOK_TRACE_INFO GMLCallFunctionHookHandle = { NULL };
 HOOK_TRACE_INFO CheckKeyHeldHookHandle = { NULL };
+HOOK_TRACE_INFO oPhysCreate0HookHandle = { NULL };
 
 EventCallbackHook* g_pEventCallback_PlayerStep0 = new EventCallbackHook();
 EventCallbackHook* g_pEventCallback_InputStep2 = new EventCallbackHook();
@@ -40,6 +41,7 @@ EventCallbackHook* g_pEventCallback_oRoomTransitionCreate0 = new EventCallbackHo
 EventCallbackHook* g_pEventCallback_oPlayerCleanup0 = new EventCallbackHook();
 EventCallbackHook* g_pEventCallback_oPlayerCreate0 = new EventCallbackHook();
 EventCallbackHook* g_pEventCallback_oDebugSpawnerStep0 = new EventCallbackHook();
+EventCallbackHook* g_pEventCallback_oPhysCreate0 = new EventCallbackHook();
 EventCallbackHook* g_pCurrentEvent = nullptr;
 EventCallbackHook* g_pPrevEvent = nullptr;
 void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
@@ -102,6 +104,20 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 		ExclusiveHook(&WindowMouseGetYHookHandle);
 	}
 
+	result = AddHook((void*)WEBBED_OPHYS_CREATE0_ADDR, GMLObject_oPhysCreate0_Hook, NULL, &oPhysCreate0HookHandle);
+
+	if (FAILED(result))
+	{
+		std::wstring err(RtlGetLastErrorString());
+		DebugOutputW(err.c_str());
+	}
+	else
+	{
+		DebugOutput("oPhysCreate0 hook installed.");
+		ExclusiveHook(&oPhysCreate0HookHandle);
+	}
+
+
 	/*
 	result = AddHook((void*)WEBBED_CHECK_KEY_HELD_ADDR, check_key_held_Hook, NULL, &CheckKeyHeldHookHandle);
 
@@ -133,6 +149,8 @@ void __stdcall NativeInjectionEntryPoint(REMOTE_ENTRY_INFO* inRemoteInfo)
 	unsigned long temp = 0x0118E42F;
 	
 	VirtualProtect((LPVOID)temp, 4, PAGE_EXECUTE_READWRITE, &dwOldProt);
+	VirtualProtect((LPVOID)WEBBED_SET_PAUSEEVENTREGISTERED_ADDR, 0x08, PAGE_EXECUTE_READWRITE, &dwOldProt);
+	PatchPauseEventRegister(true);
 
 	g_pPlaybackMgr = new PlaybackManager("Webbed.rec");
 
@@ -197,12 +215,23 @@ void UnpatchDeltaTime() {
 	*(unsigned char*)(patch_addr + 4) = 0x66;
 	*(unsigned char*)(patch_addr + 5) = 0x01;
 
-	// set it once for consistenc
 	*(unsigned long*)(0x1669908) = 16667;
 }
 
+void PatchPauseEventRegister(bool patch) {
+
+	unsigned long addr = WEBBED_SET_PAUSEEVENTREGISTERED_ADDR;
+
+	if (patch) {
+		*(unsigned char*)(addr+6) = 0x00;
+	}
+	else {
+		*(unsigned char*)(addr+6) = 0x01;
+	}
+}
+
 void SetDelta(unsigned long newDelta) {
-	//1000000
+	// (1/fps)*10^6
 	*(unsigned long*)(0x1669908) = (1 / newDelta) * 1000000;
 }
 

@@ -32,4 +32,7 @@ extern void __cdecl GMLObject_oPlayer_Create0_Callback(GMLObject*, void*);
 
 //00E78313         | C746 40 D0714401                   | mov dword ptr ds:[esi+0x40],webbed.14471D0                              | 14471D0:"gml_Object_oDebugSpawner_Step_0"
 extern void __cdecl GMLObject_oDebugSpawnwer_Step0_Callback(GMLObject*, void*);
+
+//0096FFEE         | C746 10 43DF4301                   | mov dword ptr ds:[esi+0x10],webbed.143DF43                              | 143DF43:"gml_Object_oPhys_Create_0"
+extern void __cdecl GMLObject_oPhys_Create0_Callback(GMLObject*, void*);
 extern void SetupEventCallbacks();

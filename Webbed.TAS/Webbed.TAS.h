@@ -33,7 +33,7 @@ extern HOOK_TRACE_INFO WindowMouseGetXHookHandle;
 extern HOOK_TRACE_INFO WindowMouseGetYHookHandle;
 extern HOOK_TRACE_INFO GMLCallFunctionHookHandle;
 extern HOOK_TRACE_INFO CheckKeyHeldHookHandle;
-
+extern HOOK_TRACE_INFO oPhysCreate0HookHandle;
 
 extern std::map<std::string, EventCallbackHook*> g_CallbackMap;
 extern std::vector<std::string> g_GenericObjectEventNames;
@@ -52,12 +52,14 @@ extern EventCallbackHook* g_pEventCallback_oRoomTransitionCreate0;
 extern EventCallbackHook* g_pEventCallback_oPlayerCleanup0;
 extern EventCallbackHook* g_pEventCallback_oPlayerCreate0;
 extern EventCallbackHook* g_pEventCallback_oDebugSpawnerStep0;
+extern EventCallbackHook* g_pEventCallback_oPhysCreate0;
 
 extern EventCallbackHook* g_pCurrentEvent;
 extern EventCallbackHook* g_pPrevEvent;
 
 extern void SetDrawEnabled(bool);
 extern void PatchDeltaTime();
+extern void PatchPauseEventRegister(bool);
 extern unsigned long GetCurrentRoomID();
 
 

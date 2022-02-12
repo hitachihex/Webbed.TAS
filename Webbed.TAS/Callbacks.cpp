@@ -10,7 +10,7 @@
 void __cdecl GMLObject_Generic_Callback(GMLObject* pGMLObject, void* arg2)
 {
 
-	bool bOnce = false;
+	static bool bOnce = false;
 	GameMaker_Event* pGMLObjectEvent = nullptr;
 	__asm
 	{
@@ -18,6 +18,7 @@ void __cdecl GMLObject_Generic_Callback(GMLObject* pGMLObject, void* arg2)
 	}
 
 	std::string objEventName = std::string(pGMLObjectEvent->m_pSubData->m_pszObjectEventName);
+	std::string objScriptName = std::string(pGMLObjectEvent->m_pszScriptName);
 
 	auto cbEvent = g_CallbackMap[objEventName];
 
@@ -33,6 +34,10 @@ void __cdecl GMLObject_Generic_Callback(GMLObject* pGMLObject, void* arg2)
 		*grabbable = 1.0f;
 		*breakable = 1.0f;
 	}*/
+
+
+
+
 	((void(__cdecl*)(void*, void*))cbEvent->m_dwOriginal)(pGMLObject, arg2);
 
 }
@@ -102,7 +107,24 @@ void __cdecl GMLObject_oIO_Step1_Callback(GMLObject* pObject, void* arg2) {
 	{
 		if (g_pPlaybackMgr->IsPlayingBack())
 		{
-			g_pPlaybackMgr->DoPlayback(g_bPressedFrameStepThisFrame);
+			/*
+			auto cur_input = g_pPlaybackMgr->GetCurrentInput();
+			// VarName with id 000188EA and index 75 is gmx
+		    // VarName with id 000188EB and index 125 is gmy
+			if (cur_input->hasMouse) {
+				*pObject->get_dbl_ptr(0x188EA) = cur_input->mouseX;
+				*pObject->get_dbl_ptr(0x188EB) = cur_input->mouseY;
+			}
+			else {
+				// keep it where it was last
+				*pObject->get_dbl_ptr(0x188EA) = 960.0;
+				*pObject->get_dbl_ptr(0x188EB) = 540.0;
+			}*/
+		 	g_pPlaybackMgr->DoPlayback(g_bPressedFrameStepThisFrame);
+		}
+		else if (g_bCursorLocked) {
+			//*pObject->get_dbl_ptr(0x188EA) = 960.0;
+			//*pObject->get_dbl_ptr(0x188EB) = 540.0;
 		}
 	}
 	gmobj_call_orig(pObject, arg2, g_pEventCallback_oIOStep1);
@@ -158,7 +180,12 @@ void __cdecl GMLObject_oGameManager_Draw75_Callback(GMLObject* pObject, void* ar
 		DoDrawText(pObject, 200.0, 200.0, fmt.c_str(), C_WHITE, FONT_TEXT_NEW);
 		//DebugOutput("Trying to draw SPOODER at %f, %f, white, and font 1", g_pCameraObject->m_fX - 900.0, g_pCameraObject->m_fY - 500.0);*/
 	std::string fmt = g_pPlaybackMgr->m_szCurrentManagerState;
-	DoDrawText(pObject, 200.0, 200.0, fmt.c_str(), C_WHITE, FONT_TEXT_NEW);
+
+	double pos_x = 200.0;
+	double pos_y = 200.0;
+
+
+	DoDrawText(pObject, pos_x, pos_y, fmt.c_str(), C_WHITE, FONT_TEXT_NEW);
 
 	gmobj_call_orig(pObject, arg2, g_pEventCallback_oGameManagerDraw75);
 }
@@ -272,6 +299,23 @@ void __cdecl GMLObject_oDebugSpawnwer_Step0_Callback(GMLObject* pObject, void* a
 	return gmobj_call_orig(pObject, arg2, g_pEventCallback_oDebugSpawnerStep0);
 }
 
+void __cdecl GMLObject_oPhys_Create0_Callback(GMLObject* pObject, void* arg2) {
+	static bool bOnce = false;
+	if (!bOnce)
+	{
+		bOnce = true;
+		DebugOutput("oPhys_Create0_Callback: pObject = %p", pObject);
+	}
+
+	if (!bOnce) {
+		bOnce = true;
+
+		dump_variable_names(pObject, "ophys_var_names.txt");
+	}
+
+	return gmobj_call_orig(pObject, arg2, g_pEventCallback_oPhysCreate0);
+}
+
 // 0x19612 bottom branch
 // 0x19613 top branch
 //0062E7C3         | C746 40 B5AD4201                   | mov dword ptr ds:[esi+0x40],webbed.142ADB5                              | [esi+40]:"gml_Object_oInstructionPrompt_Draw_75", 142ADB5:"gml_Script_draw_button_prompt"
@@ -310,6 +354,8 @@ void SetupEventCallbacks() {
 
 	t_EventCallbackHook::Init(g_pEventCallback_oDebugSpawnerStep0, "gml_Object_oDebugSpawner_Step_0", (unsigned long)(&GMLObject_oDebugSpawnwer_Step0_Callback), 0xDEADBEEF);
 
+	//t_EventCallbackHook::Init(g_pEventCallback_oPhysCreate0, "gml_Object_oPhys_Create_0", (unsigned long)(&GMLObject_oPhys_Create0_Callback), 0xDEADBEEF);
+
 	g_CallbackMap[g_pEventCallback_PlayerStep0->m_ObjectEventName] = g_pEventCallback_PlayerStep0;
 
 	g_CallbackMap[g_pEventCallback_oCameraStep1->m_ObjectEventName] = g_pEventCallback_oCameraStep1;
@@ -335,4 +381,6 @@ void SetupEventCallbacks() {
 	g_CallbackMap[g_pEventCallback_oPlayerCreate0->m_ObjectEventName] = g_pEventCallback_oPlayerCreate0;
 
 	g_CallbackMap[g_pEventCallback_oDebugSpawnerStep0->m_ObjectEventName] = g_pEventCallback_oDebugSpawnerStep0;
+
+	//g_CallbackMap[g_pEventCallback_oPhysCreate0->m_ObjectEventName] = g_pEventCallback_oPhysCreate0;
 }

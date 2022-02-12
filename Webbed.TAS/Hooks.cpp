@@ -19,6 +19,7 @@ oWindowMouseGetX original_window_mouse_get_x = (oWindowMouseGetX)(WEBBED_WINDOWM
 oWindowMouseGetY original_window_mouse_get_y = (oWindowMouseGetY)(WEBBED_WINDOWMOUSEGETY_ADDR);
 oGMLCallFunction original_GMLCallFunction = (oGMLCallFunction)(WEBBED_GMLCALLFUNCTION_ADDR);	
 ocheck_key_held original_check_key_held = (ocheck_key_held)(WEBBED_CHECK_KEY_HELD_ADDR);
+ooPhysCreate0 original_phys_create0 = (ooPhysCreate0)(WEBBED_OPHYS_CREATE0_ADDR);
 
 void __cdecl YoYoUpdate_Hook()
 {
@@ -52,6 +53,14 @@ void __cdecl YoYoUpdate_Hook()
 	{
 		if (!g_pPlaybackMgr->IsPlayingBack()) {
 			g_pPlaybackMgr->plugForJournal = false;
+
+			// don't allow alt tabbing to trigger pause event on this frame
+			//PatchPauseEventRegister(true);
+		}
+		else {
+
+			// we are playing back, it's being cancelled - allow alt tabbing to trigger pause event on this frame
+			//PatchPauseEventRegister(false);
 		}
 
 		g_pTopBranch = nullptr;
@@ -204,9 +213,11 @@ bool __cdecl EventLoop_Hook(void* arg1, void* arg2, void* arg3, void* arg4, void
 	GameMaker_Event* pEvent = (GameMaker_Event*)(arg3);
 	GMLObjectSubData* pObjectSubData = pEvent->m_pSubData;
 	const char* pcszObjectEventName = pEvent->m_pSubData->m_pszObjectEventName;
+	const char* pcszObjectScriptName = pEvent->m_pszScriptName;
 
 	if (pEvent->m_ObjectEventType == EObjectEventType::OET_UNKNOWN_00)
 	{
+		DebugOutput("EventType is 0, objectEventName=%s", pcszObjectEventName);
 		// no idea
 	}
 
@@ -215,6 +226,7 @@ bool __cdecl EventLoop_Hook(void* arg1, void* arg2, void* arg3, void* arg4, void
 		
 		auto it = g_CallbackMap.find(pcszObjectEventName);
 
+		if (it == g_CallbackMap.end()) it = g_CallbackMap.find(pcszObjectScriptName);
 		if (it != g_CallbackMap.end())
 		{
 			auto mapValue = it->second;
@@ -264,9 +276,12 @@ bool __cdecl EventLoop_Hook(void* arg1, void* arg2, void* arg3, void* arg4, void
 	}
 	else if (pEvent->m_ObjectEventType == EObjectEventType::OET_UNKNOWN_03)
 	{
+		DebugOutput("EventType is 3, objectEventName=%s", pcszObjectEventName);
 		// no idea
 	}
-
+	else {
+		DebugOutput("EventType is %d, objectEventName=%s", pEvent->m_ObjectEventType, pcszObjectEventName);
+	}
 	bool retval = original_EventLoop(arg1, arg2, arg3, arg4, arg5);
 	return retval;
 }
@@ -319,6 +334,7 @@ float __stdcall gamepad_get_axis_value_hook(unsigned int axisIndex)
 	return 0.0;
 }
 
+#define USE_MOUSE_HOOKS 1
 #define WINDOW_WIDTH  1920
 #define WINDOW_HEIGHT 1080
 constexpr double center_x = WINDOW_WIDTH / 2;
@@ -326,7 +342,9 @@ constexpr double center_y = WINDOW_HEIGHT / 2;
 void __cdecl window_mouse_get_y_Hook(YYRealAgument* arg) {
 
 	original_window_mouse_get_y(arg);
-	g_mouse_y = arg->value;
+
+#ifdef USE_MOUSE_HOOKS
+	//g_mouse_y = arg->value;
 
 	if (g_pPlaybackMgr) {
 		if (g_pPlaybackMgr->IsPlayingBack()) {
@@ -360,12 +378,15 @@ void __cdecl window_mouse_get_y_Hook(YYRealAgument* arg) {
 			arg->value = 540;
 		}
 	}
+#endif
 }
 
 void __cdecl window_mouse_get_x_Hook(YYRealAgument* arg) {
 
 	original_window_mouse_get_x(arg);
-	g_mouse_x = arg->value;
+	
+#ifdef USE_MOUSE_HOOKS
+	//g_mouse_x = arg->value;
 
 	if (g_pPlaybackMgr) {
 		if (g_pPlaybackMgr->IsPlayingBack()) {
@@ -385,6 +406,7 @@ void __cdecl window_mouse_get_x_Hook(YYRealAgument* arg) {
 			arg->value = 960;
 		}
 	}
+#endif
 
 }
 
@@ -444,4 +466,15 @@ bool __cdecl check_key_held_Hook(unsigned char kc) {
 	}
 
 	return original_check_key_held(kc);
+}
+
+void __cdecl GMLObject_oPhysCreate0_Hook(GMLObject* pObject, void* arg2) {
+
+	static bool bOnce = false;
+
+	if (!bOnce) {
+		bOnce = true;
+		//dump_variable_names(pObject, "ophys_var_names.txt");
+	}
+	return original_phys_create0(pObject, arg2);
 }

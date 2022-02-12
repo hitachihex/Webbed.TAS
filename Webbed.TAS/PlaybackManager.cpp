@@ -922,6 +922,13 @@ void PlaybackManager::FormatManagerString()
 	if (g_bCursorLocked) playerInfo += "true";
 	else playerInfo += "false";
 
+	if (g_pIOObject) {
+		// VarName with id 000188EA and index 75 is gmx
+		// VarName with id 000188EB and index 125 is gmy
+
+
+	}
+
 	//VarName with id 000189C0 and index 65 is lock_to_room
 	//VarName with id 000189C1 and index 115 is locked
 	if (g_pCameraObject) {
